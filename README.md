@@ -1,1 +1,2 @@
 # Databese_project
+がんばろうねー！
