@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大学の課題 管理ボード</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <style>
+        .container {
+            max-width: 98% !important;
+            width: 98%;
+            margin: 0 auto;
+            padding: 20px 10px;
+        }
+
+        /* --- 通知メッセージ（フラッシュメッセージ） --- */
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            animation: fadeIn 0.4s;
+        }
+        .alert-success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .alert-info { color: #0c5460; background-color: #d1ecf1; border: 1px solid #bee5eb; }
+        .alert-warning { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 【追加】検索フォームのスタイル --- */
+        .search-container {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .search-input {
+            padding: 10px 15px;
+            width: 350px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-input:focus { border-color: #3498db; }
+        .search-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .search-button:hover { background: #2980b9; }
+
+        /* ボードレイアウト */
+        .kanban-board {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+        .kanban-column {
+            background-color: #ebedf0;
+            border-radius: 8px;
+            flex: 1; 
+            min-width: 250px;
+            padding: 10px;
+            min-height: 80vh;
+        }
+        .column-header {
+            font-weight: bold;
+            padding: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #ccc;
+        }
+
+        /* タスクカードのデザイン */
+        .task-card {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-decoration: none;
+            display: block;
+            color: #333;
+            transition: transform 0.1s;
+        }
+        .task-card:hover { transform: scale(1.02); }
+
+        /* 優先度別の左線 */
+        .priority-高 { border-left: 5px solid #ff4d4f; }
+        .priority-中 { border-left: 5px solid #ffc107; }
+        .priority-低 { border-left: 5px solid #52c41a; }
+        
+        .task-title { font-weight: bold; display: block; margin-bottom: 8px; }
+
+        /* 期間表示 */
+        .task-date { 
+            font-size: 0.8rem; 
+            color: #666; 
+            margin-bottom: 8px; 
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 5px;
+        }
+
+        /* アラート用スタイル */
+        .overdue { color: #ff4d4f !important; font-weight: bold; }
+        .due-today { color: #fa8c16 !important; font-weight: bold; }
+
+        /* 優先度バッジ */
+        .priority-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            color: #777;
+            display: inline-block;
+        }
+
+        .add-button {
+            display: inline-block;
+            background: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                <i class="fas fa-check-circle"></i> {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <header style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #333;">大学の課題 管理ボード</h1>
+            <p style="color: #666;">〜 課題を効率よく管理しよう 〜</p>
+        </header>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+            <a href="{{ url_for('show_create_memo') }}" class="add-button">
+                <i class="fas fa-plus"></i> 新しいタスクを追加
+            </a>
+
+            <div class="search-container">
+                <form action="{{ url_for('index') }}" method="GET" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" name="search" class="search-input" placeholder="課題名で検索..." value="{{ search_query }}">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i> 検索
+                    </button>
+                    {% if search_query %}
+                        <a href="{{ url_for('index') }}" style="font-size: 0.8rem; color: #999;">クリア</a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <div class="kanban-board">
+            {% for status in ['未着手', '進行中', '完了', '保留'] %}
+            <div class="kanban-column">
+                <div class="column-header">
+                    {{ status }}
+                    <span style="background:#999; color:white; padding:0 8px; border-radius:10px; font-size:0.8rem;">
+                        {{ tasks[status]|length }}
+                    </span>
+                </div>
+
+                {% for memo in tasks[status] %}
+                <a href="{{ url_for('view_memo', memo_id=memo.id) }}" class="task-card priority-{{ memo.priority }}">
+                    <span class="task-title">{{ memo.title }}</span>
+                    
+                    {% set is_overdue = false %}
+                    {% set is_due_today = false %}
+                    {% if memo.status != '完了' %}
+                        {% if memo.end_date < today %}
+                            {% set is_overdue = true %}
+                        {% elif memo.end_date == today %}
+                            {% if memo.end_time and memo.end_time < now_time %}
+                                {% set is_overdue = true %}
+                            {% else %}
+                                {% set is_due_today = true %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                    
+                    <div class="task-date {% if is_overdue %}overdue{% elif is_due_today %}due-today{% endif %}">
+                        <i class="far fa-calendar-alt"></i> 
+                        
+                        {% if is_overdue %}
+                            <i class="fas fa-exclamation-triangle"></i> 期限切れ！
+                        {% elif is_due_today %}
+                            <i class="fas fa-clock"></i> まもなく締切！
+                        {% endif %}
+
+                        {{ memo.start_date }} {{ memo.start_time }} 〜 {{ memo.end_date }} {{ memo.end_time }}
+                    </div>
+
+                    <span class="priority-badge">{{ memo.priority }}</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

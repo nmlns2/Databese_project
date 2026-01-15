@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タスク詳細 - {{ memo.title }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/view_memo.css') }}">
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .info-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        .info-table th, .info-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .info-table th {
+            width: 30%;
+            color: #666;
+            background-color: #fafafa;
+        }
+        .comment-area {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 100px;
+            white-space: pre-wrap; /* 改行を有効にする */
+        }
+        .status-update-form {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #d0e3ff;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="view_memo" class="container">
+        <h1 class="title-border">{{ memo.title }}</h1>
+
+        <div class="status-badge">
+            <i class="fas fa-thumbtack"></i> 現在の状態: {{ memo.status }}
+        </div>
+
+        <table class="info-table">
+            <tr>
+                <th><i class="fas fa-calendar-alt"></i> 期間（開始）</th>
+                <td>{{ memo.start_date }} <span style="margin-left:10px; color:#333;">{{ memo.start_time }}</span></td>
+            </tr>
+            <tr>
+                <th><i class="fas fa-calendar-check"></i> 期間（終了）</th>
+                <td>{{ memo.end_date }} <span style="margin-left:10px; color:#333;">{{ memo.end_time }}</span></td>
+            </tr>
+            <tr>
+                <th><i class="fas fa-flag"></i> 優先度</th>
+                <td><strong>{{ memo.priority }}</strong></td>
+            </tr>
+            <tr>
+                <th><i class="fas fa-clock"></i> 作成日時</th>
+                <td>{{ memo.created_at.strftime('%Y年 %m月 %d日 %H:%M') }}</td>
+            </tr>
+        </table>
+
+        <div class="contents">
+            <h3><i class="fas fa-align-left"></i> 詳細コメント</h3>
+            <div class="comment-area">
+                {% if memo.content %}
+                    {{ memo.content }}
+                {% else %}
+                    <span style="color: #999;">コメントはありません。</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="status-update-form">
+            <form method="POST" action="{{ url_for('update_status', memo_id=memo.id) }}">
+                <label for="status"><strong><i class="fas fa-exchange-alt"></i> 状態を変更する:</strong></label>
+                <select name="status" id="status" style="padding: 5px; margin-left: 10px;">
+                    <option value="未着手" {% if memo.status == '未着手' %}selected{% endif %}>未着手</option>
+                    <option value="進行中" {% if memo.status == '進行中' %}selected{% endif %}>進行中</option>
+                    <option value="完了" {% if memo.status == '完了' %}selected{% endif %}>完了</option>
+                    <option value="保留" {% if memo.status == '保留' %}selected{% endif %}>保留</option>
+                </select>
+                <button type="submit" class="button" style="padding: 5px 15px; margin-left: 5px; background: #3498db; color:white; border:none; border-radius:4px;">更新</button>
+            </form>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('index') }}" class="button" style="background: #95a5a6; color:white; text-decoration:none; padding:10px 20px; border-radius:4px;">
+                <i class="fas fa-arrow-left"></i> 一覧に戻る
+            </a>
+
+            <form method="POST" action="{{ url_for('delete_memo', memo_id=memo.id) }}" style="flex-grow: 1; text-align: right;">
+                <button type="submit" class="delete button" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:4px;" onclick="return confirm('このタスクを削除してもよろしいですか？')">
+                    <i class="fas fa-trash"></i> タスクを削除
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

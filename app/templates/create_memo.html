@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規タスク登録 - 大学の課題 管理ボード</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_memo.css') }}">
+    <style>
+        /* 入力フォームを整えるスタイル */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .date-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* パディングを含めた幅計算 */
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        .optional-tag {
+            font-weight: normal;
+            font-size: 0.8rem;
+            color: #999;
+            margin-left: 5px;
+        }
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .submit-btn:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div id="create_memo" class="container">
+        <h1 class="title-border"><i class="fas fa-plus-circle"></i> 新規タスクの登録</h1>
+
+        <form action="{{ url_for('create_memo') }}" method="POST" class="modern-form">
+            <div class="form-group">
+                <label for="title">タスク名・タイトル</label>
+                <input type="text" id="title" name="title" placeholder="例: プログラミング課題提出" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="far fa-calendar-alt"></i> 期間（開始 〜 終了）</label>
+                <div class="date-input-group" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 5px;">
+                     <input type="date" name="start_date" required>
+                    <input type="time" name="start_time">
+                </div>
+                <div style="text-align: center;">〜</div>
+                <div style="display: flex; gap: 5px;">
+                    <input type="date" name="end_date" required>
+                    <input type="time" name="end_time">
+                </div>
+            </div>
+        </div>
+
+            <div class="form-group">
+                <label for="priority"><i class="fas fa-flag"></i> 優先度</label>
+                <select id="priority" name="priority" required>
+                    <option value="低">低（余裕あり / 気が向いたら）</option>
+                    <option value="中" selected>中（普通 / 忘れないうちに）</option>
+                    <option value="高">高（重要 / 期限間近）</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="content">詳細コメント<span class="optional-tag">(任意)</span></label>
+                <textarea id="content" name="content" placeholder="授業名や、具体的な内容をメモしてください"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> タスクを保存する
+            </button>
+        </form>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="{{ url_for('index') }}" style="color: #95a5a6; text-decoration: none;">
+                <i class="fas fa-undo"></i> 一覧に戻る
+            </a>
+        </div>
+    </div>
+</body>
+</html>
