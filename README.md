@@ -27,8 +27,8 @@ Frontend: HTML5, CSS3, FontAwesome (CDN)
 # Database Settings
 
 📦 ステップ1：設定ファイル（.env）の準備
-アプリを動かすための「合言葉」を設定します。 プロジェクトのルートフォルダ（main.pyがある場所）に .env という名前のファイルを作成し、以下の内容を貼り付けてください。
-
+アプリを動かすための「合言葉」を設定します。 app/フォルダやdb/フォルダを選択している状態でファイル追加ボタンを押すと、そのフォルダの中に作られてしまうので、そうならないように注意してください。 
+内容は以下の通りです。
 
 API_PORT=3000
 
@@ -45,7 +45,7 @@ POSTGRES_HOST=db
 🏃‍♂️ ステップ2：アプリの起動方法
 準備ができたら、ターミナル（WindowsならPowerShell、Macならターミナル）を開き、以下のコマンドを打ち込みます。
 
-docker-compose up --build
+docker compose up --build -d
 
 「Successfully started」などの表示が出れば準備完了です！
 
@@ -55,6 +55,10 @@ docker-compose up --build
 👉 http://localhost:3000
 
 これで、あなた専用の課題管理ボードが使い始められます！
+
+作業が終了したら、以下のコマンドを実行してコンテナを全て削除してください。
+
+docker compose down --rmi all
 
 💡 使い方のヒント
 検索: 画面中央の検索窓に文字を入れると、全ての列から一致する課題を探します。
