@@ -29,15 +29,18 @@ Frontend: HTML5, CSS3, FontAwesome (CDN)
 📦 ステップ1：設定ファイル（.env）の準備
 アプリを動かすための「合言葉」を設定します。 プロジェクトのルートフォルダ（main.pyがある場所）に .env という名前のファイルを作成し、以下の内容を貼り付けてください。
 
-POSTGRES_USER=user
+
+API_PORT=3000
+
+DB_PORT=5432
+
+POSTGRES_USER=guest
 
 POSTGRES_PASSWORD=password
 
-POSTGRES_DB=kanban_db
+POSTGRES_DB=guest
 
 POSTGRES_HOST=db
-
-POSTGRES_PORT=5432
 
 🏃‍♂️ ステップ2：アプリの起動方法
 準備ができたら、ターミナル（WindowsならPowerShell、Macならターミナル）を開き、以下のコマンドを打ち込みます。
@@ -49,7 +52,7 @@ docker-compose up --build
 🌐 ステップ3：ブラウザで開く
 起動が終わったら、ブラウザ（Chromeなど）で以下の住所を入力してください。
 
-👉 http://localhost:5000
+👉 http://localhost:3000
 
 これで、あなた専用の課題管理ボードが使い始められます！
 
