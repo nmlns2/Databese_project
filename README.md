@@ -27,15 +27,22 @@
  
 ### 1. 設定ファイル（.env）の準備
 アプリを動かすための「合言葉」を設定します。 プロジェクトのルートフォルダ（main.pyがある場所）に .env という名前のファイルを作成し、以下の内容を貼り付けてください。
+
 API_PORT=3000
+
 DB_PORT=5432
+
 POSTGRES_USER=guest
+
 POSTGRES_PASSWORD=password
+
 POSTGRES_DB=guest
+
 POSTGRES_HOST=db
 
 ### 2. アプリの起動
 ターミナル（WindowsならPowerShell、Macならターミナル）を開き、以下のコマンドを打ち込みます。
+
 docker-compose up --build
 
 ### 3.ブラウザでアクセス
