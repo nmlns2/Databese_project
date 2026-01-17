@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ユーザー登録 - 大学の課題管理</title>
+    <style>
+        body { background-color: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
+        h2 { text-align: center; color: #1a202c; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #2ecc71; }
+        button { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #27ae60; }
+        .link { text-align: center; margin-top: 20px; font-size: 0.9rem; color: #666; }
+        .link a { color: #3498db; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h2>新規ユーザー登録</h2>
+        <form method="POST">
+            <input type="text" name="username" placeholder="ユーザー名" required autofocus>
+            <input type="password" name="password" placeholder="パスワード" required>
+            <button type="submit">アカウントを作成</button>
+        </form>
+        <div class="link">既に登録済みですか？ <a href="{{ url_for('login') }}">ログインはこちら</a></div>
+    </div>
+</body>
+</html>

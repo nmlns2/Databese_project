@@ -1,8 +1,31 @@
 import uuid
 from flask_sqlalchemy import SQLAlchemy
+# ログイン管理とセキュリティのための部品を追加
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
+# --- 1. ユーザー情報のテーブル (新規追加) ---
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    # パスワードはそのまま保存せず、暗号化（ハッシュ化）して保存します
+    password_hash = db.Column(db.String(256), nullable=False)
+    
+    # このユーザーが持っている課題リスト（1対多のリレーションシップ）
+    memos = db.relationship('Memo', backref='author', lazy=True)
+
+    def set_password(self, password):
+        """パスワードを暗号化して保存する"""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """入力されたパスワードが正しいか確認する"""
+        return check_password_hash(self.password_hash, password)
+
+# --- 2. 課題データのテーブル (user_idを追加) ---
 class Memo(db.Model):
     __tablename__ = 'memos'
 
@@ -12,30 +35,29 @@ class Memo(db.Model):
     # 課題のタイトル
     title = db.Column(db.String(100), nullable=False)
     
-    # 詳細コメント（任意入力にするため nullable=True に変更）
+    # 詳細コメント
     content = db.Column(db.Text, nullable=True)
     
-    
-    # 日付 (◯年◯月◯日〜◯年◯月◯日)
-    start_date = db.Column(db.String(10), nullable=False) # 開始日 (例: 2026-01-15)
-    end_date = db.Column(db.String(10), nullable=False)   # 終了日
+    # 日付
+    start_date = db.Column(db.String(10), nullable=False)
+    end_date = db.Column(db.String(10), nullable=False)
 
-    # --- 【追加】時間 ---
-    start_time = db.Column(db.String(5), nullable=True) # HH:MM 形式
+    # 時間
+    start_time = db.Column(db.String(5), nullable=True)
     end_time = db.Column(db.String(5), nullable=True)
     
-    # 優先度 (高・中・低)
+    # 優先度
     priority = db.Column(db.String(10), nullable=False)
     
-    # ステータス (未着手・進行中・完了・保留)
-    # これが「どの列に表示するか」を決めます
+    # ステータス
     status = db.Column(db.String(20), default='未着手', nullable=False)
     
-    # -----------------------------------------
-
-    # 作成日時と更新日時（既存のものを維持）
+    # 作成日時と更新日時
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    # 【重要】誰の課題かを示すユーザーIDを追加（外部キー）
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def __repr__(self):
         return f'<Memo {self.title}>'

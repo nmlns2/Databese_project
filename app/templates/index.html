@@ -3,33 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大学の課題 管理ボード</title>
+    <title>SMYタスク管理ボード</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
     <style>
-        .container {
+        /* --- カラー変数の定義（変更なし） --- */
+        :root {
+            --bg-color: #f0f2f5;
+            --container-bg: #ffffff;
+            --text-color: #1a202c;
+            --header-p-color: #4a5568;
+            --column-bg: #e2e8f0;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.08);
+            --input-border: #cbd5e0;
+            --badge-bg: #edf2f7;
+            --badge-text: #4a5568;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a202c;
+            --container-bg: #2d3748;
+            --text-color: #f7fafc;
+            --header-p-color: #a0aec0;
+            --column-bg: #2d3748;
+            --card-bg: #4a5568;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+            --input-border: #4a5568;
+            --badge-bg: #2d3748;
+            --badge-text: #e2e8f0;
+        }
+
+        html, body {
+            background-color: var(--bg-color) !important;
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        }
+
+        .container, header {
+            background-color: transparent !important;
             max-width: 98% !important;
             width: 98%;
             margin: 0 auto;
             padding: 20px 10px;
         }
 
-        /* --- 通知メッセージ（フラッシュメッセージ） --- */
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        #theme-toggle {
+            background: var(--card-bg);
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 6px var(--card-shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        #theme-toggle:hover { transform: scale(1.1); }
+
+        header h1 { color: var(--text-color) !important; font-weight: 800; letter-spacing: -0.025em; }
+        header p { color: var(--header-p-color) !important; }
+
         .alert {
             padding: 12px;
             margin-bottom: 20px;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
-            animation: fadeIn 0.4s;
+            box-shadow: 0 2px 4px var(--card-shadow);
         }
         .alert-success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
-        .alert-info { color: #0c5460; background-color: #d1ecf1; border: 1px solid #bee5eb; }
-        .alert-warning { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 【追加】検索フォームのスタイル --- */
         .search-container {
             margin-bottom: 25px;
             display: flex;
@@ -38,110 +99,163 @@
             gap: 10px;
         }
         .search-input {
-            padding: 10px 15px;
-            width: 350px;
-            border: 2px solid #ddd;
+            padding: 10px 20px;
+            width: 320px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--input-border);
             border-radius: 25px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.3s;
+            transition: border-color 0.2s;
         }
         .search-input:focus { border-color: #3498db; }
         .search-button {
             background: #3498db;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 22px;
             border-radius: 25px;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.2s;
         }
         .search-button:hover { background: #2980b9; }
 
-        /* ボードレイアウト */
         .kanban-board {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             align-items: flex-start;
             justify-content: space-between;
         }
         .kanban-column {
-            background-color: #ebedf0;
-            border-radius: 8px;
+            background-color: var(--column-bg);
+            border-radius: 12px;
             flex: 1; 
-            min-width: 250px;
-            padding: 10px;
-            min-height: 80vh;
+            min-width: 260px;
+            padding: 16px;
+            min-height: 85vh;
+            box-shadow: inset 0 2px 4px var(--card-shadow);
         }
         .column-header {
-            font-weight: bold;
-            padding: 8px;
-            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
-            border-bottom: 2px solid #ccc;
+            align-items: center;
+            border-bottom: 2px solid var(--card-shadow);
+            color: var(--text-color);
         }
 
-        /* タスクカードのデザイン */
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #3498db !important;
+        }
+        .task-list {
+            min-height: 70vh;
+        }
+
         .task-card {
-            background: white;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px var(--card-shadow);
             text-decoration: none;
             display: block;
-            color: #333;
-            transition: transform 0.1s;
+            color: var(--text-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: grab;
         }
-        .task-card:hover { transform: scale(1.02); }
+        .task-card:active { cursor: grabbing; }
 
-        /* 優先度別の左線 */
-        .priority-高 { border-left: 5px solid #ff4d4f; }
-        .priority-中 { border-left: 5px solid #ffc107; }
-        .priority-低 { border-left: 5px solid #52c41a; }
+        .task-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 8px 15px var(--card-shadow);
+        }
+
+        .priority-高 { border-left: 6px solid #ff4d4f; }
+        .priority-中 { border-left: 6px solid #ffc107; }
+        .priority-低 { border-left: 6px solid #52c41a; }
         
-        .task-title { font-weight: bold; display: block; margin-bottom: 8px; }
-
-        /* 期間表示 */
+        .task-title { font-size: 1.05rem; font-weight: bold; display: block; margin-bottom: 10px; }
         .task-date { 
-            font-size: 0.8rem; 
-            color: #666; 
-            margin-bottom: 8px; 
+            font-size: 0.82rem; 
+            color: var(--header-p-color); 
+            margin-bottom: 10px; 
             display: flex;
             align-items: center;
             flex-wrap: wrap; 
-            gap: 5px;
+            gap: 6px;
         }
 
-        /* アラート用スタイル */
-        .overdue { color: #ff4d4f !important; font-weight: bold; }
-        .due-today { color: #fa8c16 !important; font-weight: bold; }
+        .overdue { color: #ff4d4f !important; font-weight: 800; }
+        .due-today { color: #fa8c16 !important; font-weight: 800; }
 
-        /* 優先度バッジ */
         .priority-badge {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: #f0f0f0;
-            border: 1px solid #ddd;
-            color: #777;
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--badge-bg);
+            border: 1px solid var(--input-border);
+            color: var(--badge-text);
             display: inline-block;
+            font-weight: bold;
         }
 
         .add-button {
             display: inline-block;
             background: #2ecc71;
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            border-radius: 10px;
             text-decoration: none;
             margin-bottom: 20px;
             font-weight: bold;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+            transition: 0.2s;
+        }
+        .add-button:hover { background: #27ae60; transform: translateY(-2px); }
+
+        .logout-link {
+            color: var(--header-p-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-left: 20px;
+            transition: opacity 0.2s;
+        }
+        .logout-link:hover { opacity: 0.7; }
+
+        /* --- 【新規追加】スマホ対応：画面幅が768px以下の時の設定 --- */
+        @media (max-width: 768px) {
+            .kanban-board {
+                flex-direction: column; /* 縦に並べる */
+                align-items: stretch;
+            }
+            .kanban-column {
+                min-width: 100%;
+                min-height: auto;
+                margin-bottom: 20px;
+            }
+            .search-input {
+                width: 100%; /* 検索窓を広げる */
+            }
+            .search-container {
+                flex-direction: column;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="theme-toggle-container">
+        <button id="theme-toggle" title="テーマを切り替え">
+            <i id="theme-icon" class="fas fa-moon"></i>
+        </button>
+    </div>
+
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -153,24 +267,29 @@
           {% endif %}
         {% endwith %}
 
-        <header style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #333;">大学の課題 管理ボード</h1>
-            <p style="color: #666;">〜 課題を効率よく管理しよう 〜</p>
+        <header style="text-align: center; margin-bottom: 30px;">
+            <h1>大学の課題 管理ボード</h1>
+            <p>〜 課題を効率よく管理しよう 〜</p>
         </header>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
-            <a href="{{ url_for('show_create_memo') }}" class="add-button">
-                <i class="fas fa-plus"></i> 新しいタスクを追加
-            </a>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+            <div style="margin-bottom: 15px;">
+                <a href="{{ url_for('show_create_memo') }}" class="add-button">
+                    <i class="fas fa-plus"></i> 新しいタスクを追加
+                </a>
+                <a href="{{ url_for('logout') }}" class="logout-link">
+                    <i class="fas fa-sign-out-alt"></i> ログアウト
+                </a>
+            </div>
 
             <div class="search-container">
-                <form action="{{ url_for('index') }}" method="GET" style="display: flex; align-items: center; gap: 8px;">
+                <form action="{{ url_for('index') }}" method="GET" style="display: flex; align-items: center; gap: 8px; width: 100%;">
                     <input type="text" name="search" class="search-input" placeholder="課題名で検索..." value="{{ search_query }}">
                     <button type="submit" class="search-button">
                         <i class="fas fa-search"></i> 検索
                     </button>
                     {% if search_query %}
-                        <a href="{{ url_for('index') }}" style="font-size: 0.8rem; color: #999;">クリア</a>
+                        <a href="{{ url_for('index') }}" style="font-size: 0.85rem; color: #999; text-decoration: none; margin-left: 5px;">クリア</a>
                     {% endif %}
                 </form>
             </div>
@@ -178,50 +297,101 @@
 
         <div class="kanban-board">
             {% for status in ['未着手', '進行中', '完了', '保留'] %}
-            <div class="kanban-column">
+            <div class="kanban-column" data-status="{{ status }}">
                 <div class="column-header">
-                    {{ status }}
-                    <span style="background:#999; color:white; padding:0 8px; border-radius:10px; font-size:0.8rem;">
+                    <span>{{ status }}</span>
+                    <span style="background: rgba(0,0,0,0.1); color: var(--text-color); padding: 2px 10px; border-radius: 12px; font-size: 0.85rem;">
                         {{ tasks[status]|length }}
                     </span>
                 </div>
 
-                {% for memo in tasks[status] %}
-                <a href="{{ url_for('view_memo', memo_id=memo.id) }}" class="task-card priority-{{ memo.priority }}">
-                    <span class="task-title">{{ memo.title }}</span>
-                    
-                    {% set is_overdue = false %}
-                    {% set is_due_today = false %}
-                    {% if memo.status != '完了' %}
-                        {% if memo.end_date < today %}
-                            {% set is_overdue = true %}
-                        {% elif memo.end_date == today %}
-                            {% if memo.end_time and memo.end_time < now_time %}
+                <div class="task-list">
+                    {% for memo in tasks[status] %}
+                    <a href="{{ url_for('view_memo', memo_id=memo.id) }}" class="task-card priority-{{ memo.priority }}" data-id="{{ memo.id }}">
+                        <span class="task-title">{{ memo.title }}</span>
+                        
+                        {% set is_overdue = false %}
+                        {% set is_due_today = false %}
+                        {% if memo.status != '完了' %}
+                            {% if memo.end_date < today %}
                                 {% set is_overdue = true %}
-                            {% else %}
-                                {% set is_due_today = true %}
+                            {% elif memo.end_date == today %}
+                                {% if memo.end_time and memo.end_time < now_time %}
+                                    {% set is_overdue = true %}
+                                {% else %}
+                                    {% set is_due_today = true %}
+                                {% endif %}
                             {% endif %}
                         {% endif %}
-                    {% endif %}
-                    
-                    <div class="task-date {% if is_overdue %}overdue{% elif is_due_today %}due-today{% endif %}">
-                        <i class="far fa-calendar-alt"></i> 
                         
-                        {% if is_overdue %}
-                            <i class="fas fa-exclamation-triangle"></i> 期限切れ！
-                        {% elif is_due_today %}
-                            <i class="fas fa-clock"></i> まもなく締切！
-                        {% endif %}
-
-                        {{ memo.start_date }} {{ memo.start_time }} 〜 {{ memo.end_date }} {{ memo.end_time }}
-                    </div>
-
-                    <span class="priority-badge">{{ memo.priority }}</span>
-                </a>
-                {% endfor %}
+                        <div class="task-date {% if is_overdue %}overdue{% elif is_due_today %}due-today{% endif %}">
+                            <i class="far fa-calendar-alt"></i> 
+                            {% if is_overdue %}
+                                <i class="fas fa-exclamation-triangle"></i> 期限切れ！
+                            {% elif is_due_today %}
+                                <i class="fas fa-clock"></i> まもなく締切！
+                            {% endif %}
+                            {{ memo.start_date }} {{ memo.start_time }} 〜 {{ memo.end_date }} {{ memo.end_time }}
+                        </div>
+                        <span class="priority-badge">{{ memo.priority }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
+
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        toggleBtn.addEventListener('click', () => {
+            let currentTheme = htmlElement.getAttribute('data-theme');
+            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        document.querySelectorAll('.task-list').forEach(el => {
+            new Sortable(el, {
+                group: 'kanban',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    const memoId = evt.item.getAttribute('data-id');
+                    const newStatus = evt.to.parentElement.getAttribute('data-status');
+
+                    fetch('/update_status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: memoId, status: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.result === 'success') {
+                            console.log('Status updated successfully');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        });
+    </script>
 </body>
 </html>

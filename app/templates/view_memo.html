@@ -51,6 +51,7 @@
             display: flex;
             gap: 10px;
             margin-top: 30px;
+            align-items: center; /* ボタンの高さを揃える */
         }
     </style>
 </head>
@@ -106,12 +107,16 @@
         </div>
 
         <div class="action-buttons">
-            <a href="{{ url_for('index') }}" class="button" style="background: #95a5a6; color:white; text-decoration:none; padding:10px 20px; border-radius:4px;">
+            <a href="{{ url_for('index') }}" class="button" style="background: #95a5a6; color:white; text-decoration:none; padding:10px 20px; border-radius:4px; font-size: 0.9rem;">
                 <i class="fas fa-arrow-left"></i> 一覧に戻る
             </a>
 
+            <a href="{{ url_for('edit_memo_form', memo_id=memo.id) }}" class="button" style="background: #f39c12; color:white; text-decoration:none; padding:10px 20px; border-radius:4px; font-size: 0.9rem;">
+                <i class="fas fa-edit"></i> 内容を編集
+            </a>
+
             <form method="POST" action="{{ url_for('delete_memo', memo_id=memo.id) }}" style="flex-grow: 1; text-align: right;">
-                <button type="submit" class="delete button" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:4px;" onclick="return confirm('このタスクを削除してもよろしいですか？')">
+                <button type="submit" class="delete button" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:4px; font-size: 0.9rem; cursor: pointer;" onclick="return confirm('このタスクを削除してもよろしいですか？')">
                     <i class="fas fa-trash"></i> タスクを削除
                 </button>
             </form>

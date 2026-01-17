@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タスクの編集 - {{ memo.title }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body { background-color: #f0f2f5; font-family: sans-serif; padding: 20px; }
+        .form-container { 
+            background: white; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #555; }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 1rem;
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: #3498db; 
+            outline: none; 
+            box-shadow: 0 0 5px rgba(52,152,219,0.3); 
+        }
+        .btn-submit { 
+            width: 100%; 
+            padding: 14px; 
+            background: #2ecc71; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        .btn-submit:hover { background: #27ae60; }
+        .btn-cancel { 
+            display: block; 
+            text-align: center; 
+            margin-top: 15px; 
+            color: #95a5a6; 
+            text-decoration: none; 
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2><i class="fas fa-edit"></i> タスクの編集</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label>タイトル</label>
+                <input type="text" name="title" value="{{ memo.title }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>詳細内容</label>
+                <textarea name="content" rows="4" placeholder="詳細を入力してください">{{ memo.content or '' }}</textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>開始日</label>
+                    <input type="date" name="start_date" value="{{ memo.start_date }}" required>
+                    <input type="time" name="start_time" value="{{ memo.start_time }}" style="margin-top:5px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>締切日</label>
+                    <input type="date" name="end_date" value="{{ memo.end_date }}" required>
+                    <input type="time" name="end_time" value="{{ memo.end_time }}" style="margin-top:5px;">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>優先度</label>
+                <select name="priority">
+                    <option value="高" {% if memo.priority == '高' %}selected{% endif %}>高</option>
+                    <option value="中" {% if memo.priority == '中' %}selected{% endif %}>中</option>
+                    <option value="低" {% if memo.priority == '低' %}selected{% endif %}>低</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ステータス</label>
+                <select name="status">
+                    <option value="未着手" {% if memo.status == '未着手' %}selected{% endif %}>未着手</option>
+                    <option value="進行中" {% if memo.status == '進行中' %}selected{% endif %}>進行中</option>
+                    <option value="完了" {% if memo.status == '完了' %}selected{% endif %}>完了</option>
+                    <option value="保留" {% if memo.status == '保留' %}selected{% endif %}>保留</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-submit">変更を保存する</button>
+            <a href="{{ url_for('view_memo', memo_id=memo.id) }}" class="btn-cancel">キャンセルして戻る</a>
+        </form>
+    </div>
+</body>
+</html>
