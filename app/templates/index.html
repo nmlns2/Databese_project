@@ -268,8 +268,8 @@
         {% endwith %}
 
         <header style="text-align: center; margin-bottom: 30px;">
-            <h1>大学の課題 管理ボード</h1>
-            <p>〜 課題を効率よく管理しよう 〜</p>
+            <h1>タスク管理ボード</h1>
+            <p>〜 タスクを効率よく管理しよう 〜</p>
         </header>
 
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
@@ -284,7 +284,7 @@
 
             <div class="search-container">
                 <form action="{{ url_for('index') }}" method="GET" style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                    <input type="text" name="search" class="search-input" placeholder="課題名で検索..." value="{{ search_query }}">
+                    <input type="text" name="search" class="search-input" placeholder="タスク名で検索..." value="{{ search_query }}">
                     <button type="submit" class="search-button">
                         <i class="fas fa-search"></i> 検索
                     </button>
